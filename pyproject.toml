@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "yyy-photo-bot"
+version = "0.0.1"
+description = "Readyyy Photo CG Twitter Bot"
+authors = ["kidyudiqy <diqyland@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.7"
+tweepy = "^3.8.0"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+pylint = "^2.4.4"
+pep8 = "^1.7.1"
+autopep8 = "^1.4.4"
+rope = "^0.14.0"
+ptpython = "^2.0.6"
