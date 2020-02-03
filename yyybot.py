@@ -70,7 +70,7 @@ class Card:
         15: ('Usui Chihiro', 'chr', '碓井 千紘'),
         16: ('Kousaka Ango', 'ang', '香坂 安吾'),
         17: ('Kamijo Uta', 'uta', '上條 雅楽'),
-        18: ('Shimizu Genshin', 'gen', '清水 弦心'),
+        18: ('Shimizu Genshin', 'gns', '清水 弦心'),
     }
 
     def __init__(self, card_dict: dict):
