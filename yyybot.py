@@ -153,7 +153,7 @@ def send_card(api: tweepy.API, card: Card):
             image_files.append(image_path.open(mode='rb'))
     assert len(image_files) == 2, f'Too many images found? {card}'
 
-    medias = [api.media_upload(fn, file=img)
+    medias = [api.media_upload(fn, file=img).media_id_string
               for fn, img in zip(card.files, image_files)]
     api.update_status(status=f'{card}', media_ids=medias)
 
@@ -173,10 +173,12 @@ def main(api: tweepy.API) -> int:
         CARDS = json.load(fj).get('Card')
     recent = []
     done = set()
+    first_run = True
     try:
         while True:
             recent = recent[-15:]
-            time.sleep(randint(25, 40) * 60)
+            if not first_run:
+                time.sleep(randint(25, 40) * 60)
 
             ctime = datetime.now(timezone(timedelta(hours=9)))
             day_month = (ctime.day, ctime.month)
@@ -211,6 +213,8 @@ def main(api: tweepy.API) -> int:
             else:
                 recent.append(cid)
                 done.add(cid)
+                if first_run:
+                    first_run = False
                 if cid == bday_list[day_month] and not has_celebrate[day_month]:
                     has_celebrate[day_month] = True
             finally:
