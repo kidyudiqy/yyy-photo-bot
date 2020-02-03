@@ -215,7 +215,7 @@ def main(api: tweepy.API) -> int:
                 done.add(cid)
                 if first_run:
                     first_run = False
-                if cid == bday_list[day_month] and not has_celebrate[day_month]:
+                if cid == bday_list.get(day_month) and not has_celebrate.get(day_month):
                     has_celebrate[day_month] = True
             finally:
                 with open(config.illustration_path / 'data.txt', 'w', encoding='utf-8') as fo:
