@@ -160,7 +160,7 @@ def send_card(api: tweepy.API, card: Card):
 
 def random_card(recent=[]) -> int:
     cid = 0
-    while cid not in recent and cid != 0:
+    while cid not in recent or cid != 0:
         chara = randint(1, 18)
         rarity, group = choice(appearance[chara])
         cid = chara * 100_000 + rarity * 10_000 + group
