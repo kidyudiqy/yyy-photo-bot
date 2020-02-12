@@ -20,14 +20,6 @@ bday_list = {
     (28, 5): (1050020, 'Tatsuma'),
     (24, 6): (950020, 'Aki'),
 }
-has_celebrate = {
-    (28, 2): False,
-    (21, 3): False,
-    (9, 4): False,
-    (13, 5): False,
-    (28, 5): False,
-    (24, 6): False,
-}
 appearance = {
     1: [(1, 1), (1, 2), (2, 4), (2, 5), (3, 9), (3, 10), (3, 11), (3, 26), (4, 15), (4, 16), (4, 37), (5, 18), (5, 19), (5, 28)],
     2: [(1, 1), (1, 2), (2, 4), (2, 5), (3, 9), (3, 10), (3, 11), (3, 24), (3, 36), (4, 15), (4, 16), (4, 28), (4, 30), (5, 18), (5, 34)],
@@ -160,7 +152,7 @@ def send_card(api: tweepy.API, card: Card):
 
 def random_card(recent=[]) -> int:
     cid = 0
-    while cid not in recent or cid != 0:
+    while cid in recent or cid == 0:
         chara = randint(1, 18)
         rarity, group = choice(appearance[chara])
         cid = chara * 100_000 + rarity * 10_000 + group
@@ -171,9 +163,21 @@ def main(api: tweepy.API) -> int:
     global CARDS
     with open('CardData.json', encoding='utf-8') as fj:
         CARDS = json.load(fj).get('Card')
+    first_run = True
+    run_data = config.illustration_path / 'data.txt'
+    has_celebrate = {
+        (28, 2): False,
+        (21, 3): False,
+        (9, 4): False,
+        (13, 5): False,
+        (28, 5): False,
+        (24, 6): False,
+    }
     recent = []
     done = set()
-    first_run = True
+    if run_data.exists():
+        with run_data.open(encoding='utf-8') as spf:
+            exec(spf.read())
     try:
         while True:
             recent = recent[-15:]
@@ -218,7 +222,7 @@ def main(api: tweepy.API) -> int:
                 if cid == bday_list.get(day_month) and not has_celebrate.get(day_month):
                     has_celebrate[day_month] = True
             finally:
-                with open(config.illustration_path / 'data.txt', 'w', encoding='utf-8') as fo:
+                with run_data.open(mode='w', encoding='utf-8') as fo:
                     print(f'recent={recent!r}', file=fo)
                     print(f'done={done!r}', file=fo)
                     print(f'has_celebrate={has_celebrate!r}', file=fo)
