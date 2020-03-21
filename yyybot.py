@@ -13,12 +13,12 @@ from textwrap import dedent
 CARDS = []
 border_files = config.illustration_path / '!Border'
 bday_list = {
-    (28, 2): (550020, 'Takumi'),
-    (21, 3): (1250020, 'Komugi'),
-    (9, 4): (150020, 'Mitsuki'),
-    (13, 5): (1850020, 'Genshin'),
-    (28, 5): (1050020, 'Tatsuma'),
-    (24, 6): (950020, 'Aki'),
+    (28, 2): (550020, 'Takumi', 5),
+    (21, 3): (1250020, 'Komugi', 12),
+    (9, 4): (150020, 'Mitsuki', 1),
+    (13, 5): (1850020, 'Genshin', 18),
+    (28, 5): (1050020, 'Tatsuma', 10),
+    (24, 6): (950020, 'Aki', 9),
 }
 appearance = {
     1: [(1, 1), (1, 2), (2, 4), (2, 5), (3, 9), (3, 10), (3, 11), (3, 26), (4, 15), (4, 16), (4, 37), (5, 18), (5, 19), (5, 28)],
@@ -150,11 +150,15 @@ def send_card(api: tweepy.API, card: Card):
     api.update_status(status=f'{card}', media_ids=medias)
 
 
-def random_card(recent=[]) -> int:
+def random_card(recent=[], chara=None, extra=None) -> int:
     cid = 0
     while cid in recent or cid == 0:
-        chara = randint(1, 18)
-        rarity, group = choice(appearance[chara])
+        if chara is None:
+            chara = randint(1, 18)
+        if extra is None:
+            rarity, group = choice(appearance[chara])
+        else:
+            rarity, group = choice(appearance[chara]+extra)
         cid = chara * 100_000 + rarity * 10_000 + group
     return cid
 
@@ -180,7 +184,7 @@ def main(api: tweepy.API) -> int:
             exec(spf.read())
     try:
         while True:
-            recent = recent[-15:]
+            recent = recent[-10:]
             if not first_run:
                 time.sleep(randint(25, 40) * 60)
 
@@ -191,7 +195,11 @@ def main(api: tweepy.API) -> int:
             if ctime.hour not in (0, 7, 9, 11, 13, 15, 17, 18, 19, 20, 21, 22, 23, 24):
                 continue
             elif is_bday and not has_celebrate[day_month]:
-                cid, _ = bday_list[day_month]
+                cid, *_ = bday_list[day_month]
+                card = get_card_details(cid)
+            elif is_bday and has_celebrate[day_month]:
+                # bday card rarity == 5, group == 20
+                cid = random_card(recent, bday_list[day_month][2], [(5, 20)])
                 card = get_card_details(cid)
             elif config.photo_queue:
                 cid = config.photo_queue.popleft()
@@ -219,7 +227,7 @@ def main(api: tweepy.API) -> int:
                 done.add(cid)
                 if first_run:
                     first_run = False
-                if cid == bday_list.get(day_month) and not has_celebrate.get(day_month):
+                if cid == bday_list.get(day_month)[0] and not has_celebrate.get(day_month):
                     has_celebrate[day_month] = True
             finally:
                 with run_data.open(mode='w', encoding='utf-8') as fo:
