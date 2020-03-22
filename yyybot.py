@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+import pickle
 import time
 import sys
 import tweepy
@@ -168,7 +169,7 @@ def main(api: tweepy.API) -> int:
     with open('CardData.json', encoding='utf-8') as fj:
         CARDS = json.load(fj).get('Card')
     first_run = True
-    run_data = config.illustration_path / 'data.txt'
+    run_data = config.illustration_path / 'data.bin'
     has_celebrate = {
         (28, 2): False,
         (21, 3): False,
@@ -180,8 +181,8 @@ def main(api: tweepy.API) -> int:
     recent = []
     done = set()
     if run_data.exists():
-        with run_data.open(encoding='utf-8') as spf:
-            exec(spf.read())
+        with run_data.open(mode='rb') as spf:
+            recent, done, has_celebrate = pickle.load(spf)
     try:
         while True:
             recent = recent[-10:]
@@ -232,10 +233,8 @@ def main(api: tweepy.API) -> int:
                     if cid == bday_card and not has_celebrate.get(day_month):
                         has_celebrate[day_month] = True
             finally:
-                with run_data.open(mode='w', encoding='utf-8') as fo:
-                    print(f'recent={recent!r}', file=fo)
-                    print(f'done={done!r}', file=fo)
-                    print(f'has_celebrate={has_celebrate!r}', file=fo)
+                with run_data.open(mode='wb') as fo:
+                    pickle.dump([recent, done, has_celebrate], fo)
     except KeyboardInterrupt:
         config.report('Bot stopped by Keyboard interrupt')
         return 0
